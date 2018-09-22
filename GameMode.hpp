@@ -36,10 +36,11 @@ struct GameMode : public Mode {
 	//------ networking ------
 	Client &client; //client object; manages connection to server.
 
-	struct {
+	struct Controls{
 		bool up = 0;
 		bool down = 0;
 		bool left = 0;
 		bool right = 0;
+		bool lock = 0;
 	} controls;
 };

@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <map>
 #include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -17,7 +18,16 @@ struct Game {
 
 	Game();
 
+	struct Controls {
+		bool up = 0;
+		bool down = 0;
+		bool left = 0;
+		bool right = 0;
+		bool lock = 0;
+	} controls;
+
 	void update(float time);
+	// void update(const Game::Controls &c);
 
 	void update_active_segment();
 
@@ -31,21 +41,20 @@ struct Game {
 	uint32_t mesh_size = grid_size * 2; 
 	std::unordered_map< uint32_t, glm::uvec2 > grid;
 	std::unordered_map< glm::uvec2, uint32_t > inv_grid;
-	// std::unordered_map< glm::uvec2, uint32_t > inverse_grid;
 	uint32_t edge_index = 0;
 	std::unordered_map< uint32_t, uint32_t > segment_status;
 	uint32_t active_segment = 0;
-
+	uint32_t num_digit_segments = 7;
+	
 	enum SegmentOptions{
 		INACTIVE,
 		HOVER,
-		LOCKED
+		LOCKED,
+		SCORED
 	};
 
-	struct {
-		bool up = 0;
-		bool down = 0;
-		bool left = 0;
-		bool right = 0;
-	} controls;
+	std::map< std::vector< bool >, uint32_t > number_templates;
+	std::vector< int32_t > delta;
+	
+	uint32_t score = 0;
 };

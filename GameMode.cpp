@@ -101,7 +101,11 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.scancode == SDL_SCANCODE_D) {
 			controls.right = (evt.type == SDL_KEYDOWN);
 			return true;
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+			controls.lock = (evt.type == SDL_KEYDOWN);
+			return true;
 		}
+		
 	}
 
 	// if (evt.type == SDL_MOUSEMOTION) {
@@ -115,11 +119,22 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void GameMode::update(float elapsed) {
 	state.update(elapsed);
+	// state.update(controls);
 
 	if (client.connection) {
 		//send game state to server:
-		client.connection.send_raw("s", 1);
-		client.connection.send_raw(&state.paddle.x, sizeof(float));
+		// client.connection.send_raw("s", 1);
+		// client.connection.send_raw(&state.paddle.x, sizeof(float));
+		client.connection.send_raw("u", 1);
+		client.connection.send_raw(&controls.up, sizeof(bool));
+		client.connection.send_raw("d", 1);
+		client.connection.send_raw(&controls.down, sizeof(bool));
+		client.connection.send_raw("l", 1);
+		client.connection.send_raw(&controls.left, sizeof(bool));
+		client.connection.send_raw("r", 1);
+		client.connection.send_raw(&controls.right, sizeof(bool));
+		client.connection.send_raw("l", 1);
+		client.connection.send_raw(&controls.lock, sizeof(bool));
 	}
 
 	client.poll([&](Connection *c, Connection::Event event){

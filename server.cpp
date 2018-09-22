@@ -27,7 +27,8 @@ int main(int argc, char **argv) {
 					if (c->recv_buffer.size() < 1 + sizeof(float)) {
 						return; //wait for more data
 					} else {
-						memcpy(&state.paddle.x, c->recv_buffer.data() + 1, sizeof(float));
+						// memcpy(&state.paddle.x, c->recv_buffer.data() + 1, sizeof(float));
+						memcpy(&state.controls.up, c->recv_buffer.data() + 1, sizeof(bool));
 						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(float));
 					}
 				}
