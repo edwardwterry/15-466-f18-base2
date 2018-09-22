@@ -18,8 +18,7 @@ Game::Game(){
 		for (uint32_t i = 0; i < edge_index; i++){ // set all segments as inactive to start
 			segment_status.insert(std::pair<uint32_t, uint32_t> (i, SegmentOptions::INACTIVE));
 		}
-		auto it = segment_status.find(active_segment);
-		it->second = SegmentOptions::HOVER; // set the upper left element to active
+		segment_status.find(active_segment)->second = SegmentOptions::HOVER; // set the upper left element to active
 	}
 
 	{ // initialize number templates
@@ -41,6 +40,7 @@ void Game::update(float time) {
 	uint32_t dr = 0;
 	uint32_t dc = 0;
 	bool lock = false;
+	// std::cout<<"up in game.cpp: "<<controls.up<<std::endl;
 	if (controls.down) {
 		dr++;
 	} else if (controls.up) {
@@ -81,9 +81,9 @@ void Game::update(float time) {
 		}
 
 		glm::uvec2 next_coord = glm::uvec2(current_coord.x + dr, current_coord.y + dc);
-		std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
+		// std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
 		active_segment = inv_grid.find(next_coord)->second;
-		std::cout<<"New active segment: "<<active_segment<<std::endl;
+		// std::cout<<"New active segment: "<<active_segment<<std::endl;
 
 		// TODO: make segments which have been visited but are neither locked nor scored, to be inactive
 	}
@@ -114,12 +114,11 @@ void Game::update(float time) {
 		}
 	}
 
-	std::vector< bool > to_check;
 	// segment_status.find(active_segment)->second = SegmentOptions::HOVER;
 
-	// if (lock) {
-	// 	segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
-	// }
+	if (lock) {
+		segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
+	}
 
 	// ball += ball_velocity * time;
 	// if (ball.x >= 0.5f * FrameWidth - BallRadius) {

@@ -23,17 +23,17 @@ int main(int argc, char **argv) {
 				if (c->recv_buffer[0] == 'h') {
 					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1);
 					std::cout << c << ": Got hello." << std::endl;
-				} else if (c->recv_buffer[0] == 's') {
-					if (c->recv_buffer.size() < 1 + sizeof(float)) {
+				} else if (c->recv_buffer[0] == 'c') {
+					if (c->recv_buffer.size() < 1 + sizeof(Game::Controls)) {
 						return; //wait for more data
 					} else {
-						// memcpy(&state.paddle.x, c->recv_buffer.data() + 1, sizeof(float));
-						memcpy(&state.controls.up, c->recv_buffer.data() + 1, sizeof(bool));
-						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(float));
+						memcpy(&state.controls, c->recv_buffer.data() + 1, sizeof(Game::Controls));
+						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::Controls));
 					}
 				}
 			}
 		}, 0.01);
+		std::cout<<state.controls.up<<state.controls.down<<state.controls.left<<state.controls.right<<state.controls.lock<<std::endl;
 		//every second or so, dump the current paddle position:
 		static auto then = std::chrono::steady_clock::now();
 		auto now = std::chrono::steady_clock::now();

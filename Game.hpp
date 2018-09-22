@@ -18,14 +18,6 @@ struct Game {
 
 	Game();
 
-	struct Controls {
-		bool up = 0;
-		bool down = 0;
-		bool left = 0;
-		bool right = 0;
-		bool lock = 0;
-	} controls;
-
 	void update(float time);
 	// void update(const Game::Controls &c);
 
@@ -52,6 +44,14 @@ struct Game {
 		LOCKED,
 		SCORED
 	};
+
+	struct Controls {
+		bool up = 0;
+		bool down = 0;
+		bool left = 0;
+		bool right = 0;
+		bool lock = 0;
+	} controls;
 
 	std::map< std::vector< bool >, uint32_t > number_templates;
 	std::vector< int32_t > delta;
