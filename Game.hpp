@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp> //allows the use of 'uvec2' as an unordered_map key
@@ -18,6 +19,8 @@ struct Game {
 
 	void update(float time);
 
+	void update_active_segment();
+
 	static constexpr const float FrameWidth = 10.0f;
 	static constexpr const float FrameHeight = 8.0f;
 	static constexpr const float PaddleWidth = 2.0f;
@@ -25,9 +28,24 @@ struct Game {
 	static constexpr const float BallRadius = 0.5f;
 
 	uint32_t grid_size = 3;
+	uint32_t mesh_size = grid_size * 2; 
 	std::unordered_map< uint32_t, glm::uvec2 > grid;
-	
-	// populate the hash table
-
+	std::unordered_map< glm::uvec2, uint32_t > inv_grid;
+	// std::unordered_map< glm::uvec2, uint32_t > inverse_grid;
 	uint32_t edge_index = 0;
+	std::unordered_map< uint32_t, uint32_t > segment_status;
+	uint32_t active_segment = 0;
+
+	enum SegmentOptions{
+		INACTIVE,
+		HOVER,
+		LOCKED
+	};
+
+	struct {
+		bool up = 0;
+		bool down = 0;
+		bool left = 0;
+		bool right = 0;
+	} controls;
 };
