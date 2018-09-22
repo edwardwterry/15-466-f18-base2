@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 		auto now = std::chrono::steady_clock::now();
 		if (now > then + std::chrono::seconds(1)) {
 			then = now;
-			std::cout << "Current paddle position: " << state.paddle.x << std::endl;
+			// std::cout << "Current paddle position: " << state.paddle.x << std::endl;
 		}
 	}
 }

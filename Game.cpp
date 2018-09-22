@@ -1,5 +1,19 @@
 #include "Game.hpp"
 
+Game::Game(){
+	for (uint32_t r = 0; r < (2 * grid_size + 1); r++){
+		uint32_t start_col = (r % 2 == 0) ? 1 : 0;
+		for (uint32_t c = start_col; c < (2 * grid_size + 1); c+=2){
+			std::pair< uint32_t, glm::uvec2 > coord (edge_index, glm::uvec2(r, c));
+			grid.insert(coord);
+			edge_index++;
+		}	
+	}
+	for (auto it = grid.begin(); it != grid.end(); ++it){
+		std::cout<<it->first<<":"<<glm::to_string(it->second)<<std::endl;
+	}
+}
+
 void Game::update(float time) {
 	ball += ball_velocity * time;
 	if (ball.x >= 0.5f * FrameWidth - BallRadius) {
