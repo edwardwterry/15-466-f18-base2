@@ -91,7 +91,6 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	if (evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.scancode == SDL_SCANCODE_W) {
 			controls.up = (evt.type == SDL_KEYDOWN);
-			std::cout<<"up"<<std::endl;
 			return true;
 		} else if (evt.key.keysym.scancode == SDL_SCANCODE_S) {
 			controls.down = (evt.type == SDL_KEYDOWN);
@@ -125,8 +124,6 @@ void GameMode::update(float elapsed) {
 
 	if (client.connection) {
 		//send game state to server:
-		// client.connection.send_raw("s", 1);
-		// client.connection.send_raw(&state.paddle.x, sizeof(float));
 		client.connection.send_raw("c", 1);
 		client.connection.send_raw(&controls, sizeof(Controls));
 	}

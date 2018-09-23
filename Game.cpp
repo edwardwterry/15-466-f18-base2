@@ -12,9 +12,7 @@ Game::Game(){
 				edge_index++;
 			}	
 		}
-		// for (auto it = grid.begin(); it != grid.end(); ++it){
-		// 	std::cout<<it->first<<":"<<glm::to_string(it->second)<<std::endl;
-		// }
+
 		for (uint32_t i = 0; i < edge_index; i++){ // set all segments as inactive to start
 			segment_status.insert(std::pair<uint32_t, uint32_t> (i, SegmentOptions::INACTIVE));
 		}
@@ -22,7 +20,15 @@ Game::Game(){
 	}
 
 	{ // initialize number templates
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({0, 0, 1, 0, 0, 1, 0}, 1));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 0, 1, 1, 1, 0, 1}, 2));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 0, 1, 1, 0, 1, 1}, 3));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({0, 1, 1, 1, 0, 1, 0}, 4));
 		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 1, 0, 1, 0, 1, 1}, 5));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 1, 0, 1, 1, 1, 1}, 6));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 1, 1, 0, 0, 1, 0}, 7));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 1, 1, 1, 1, 1, 1}, 8));
+		number_templates.emplace(std::make_pair<std::vector<bool>,uint32_t>({1, 1, 1, 1, 0, 1, 1}, 9));
 
 		// subtraction for each element
 		delta = 				{	0, 
@@ -55,12 +61,12 @@ void Game::update() {
 	}
 	if (dc != 0) assert(dr == 0);
 	if (dr != 0) assert(dc == 0);
-	std::cout<<"dcb4: "<<dc<<" drb4: "<<dr<<std::endl;
+	// std::cout<<"dcb4: "<<dc<<" drb4: "<<dr<<std::endl;
 	int32_t dc_input = dc;
 	int32_t dr_input = dr;
 	{
 		glm::uvec2 current_coord = grid.find(active_segment)->second; 
-		std::cout<<"(current_coord.x + dr): "<<(current_coord.x + dr)<<std::endl;
+		// std::cout<<"(current_coord.x + dr): "<<(current_coord.x + dr)<<std::endl;
 		// can only move L/R on vert segments
 		if (current_coord.y % 2 == 0){ // if on a vertical segment
 			if (dc_input != 0){ // and L/R command
@@ -87,70 +93,49 @@ void Game::update() {
 				}
 			}
 		}
-		// if (current_coord.y % 2 == 0 && dc_input != 0){ // if currently on a vertical segment and L/R command
-		// 	if ((current_coord.y + dc) <= 0 || (current_coord.y + dc) >= mesh_size) { // if move will take you out of bounds
-		// 		dc = 0; // do nothing
-		// 	} else {
-		// 		dc *= 2; // this will take you to adjacent vertical segment			
-		// 	}
-		// } else if (current_coord.y % 2 == 0 && dr_input != 0) { // if currently on a vertical segment and U/D command
-		// 	// if ((current_coord.y + dr) <= 0 || (current_coord.y + dr) >= mesh_size) { // if move will take you out of bounds
-		// 	// 	dr = 0; // do nothing
-		// 	// } else {
-		// 		if (current_coord.y == mesh_size){ // if you're on RH boundary
-		// 			dc--; // shift left
-		// 		} else {
-		// 			dc++; // shift right by default
-		// 		}
-		// 	// }
-		// } else if (current_coord.x % 2 == 0 && dc_input != 0){ // currently on a horiz segment and L/R command
-		// 	dc = 0; // can't move left or right on a horiz segment
-		// } else if (current_coord.x % 2 == 0 && dr_input != 0){ // currently on a horiz segment and U/D command
-		// 	dc--; // shift left by default
-		// }
-		// if ((current_coord.x + dr) <= 0 || (current_coord.x + dr) >= mesh_size) { // if move will take you out of bounds
-		// 	dr = 0; // do nothing
-		// }
 
-		std::cout<<"dc: "<<dc<<" dr: "<<dr<<std::endl;
+		// std::cout<<"dc: "<<dc<<" dr: "<<dr<<std::endl;
 		glm::uvec2 next_coord = glm::uvec2(current_coord.x + dr, current_coord.y + dc);
-		std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
+		// std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
 		active_segment = inv_grid.find(next_coord)->second;
-		std::cout<<"New active segment: "<<active_segment<<std::endl;
+		// std::cout<<"New active segment: "<<active_segment<<std::endl;
 
 		// TODO: make segments which have been visited but are neither locked nor scored, to be inactive
 	}
 
-	// { // slide template over screen
-	// 	auto get_score = [&](uint32_t &top){
-	// 		std::vector< bool > retrieved_status;
-	// 		for (uint32_t i = 0; i < num_digit_segments; i++){
-	// 			uint32_t segment_to_check = top + delta[i]; // uses the top segment, and the known deltas based on grid size
-	// 			// 1 if the segment is locked, 0 otherwise
-	// 			retrieved_status.emplace_back(segment_status.find(segment_to_check)->second == SegmentOptions::LOCKED);
-	// 		}
-	// 		if (number_templates.find(retrieved_status) != number_templates.end()){ // if exact bool match to any template
-	// 			for (uint32_t i = 0; i < num_digit_segments; i++){
-	// 				// set it to scored to prevent double counting
-	// 				segment_status.find(top + delta[i])->second = SegmentOptions::SCORED;
-	// 			}				
-	// 			return number_templates.find(retrieved_status)->second;
-	// 		} else {
-	// 			return (uint32_t)0;
-	// 		}
-	// 	};
+	{ // slide template over screen
+		auto get_score = [&](uint32_t &top){
+			std::vector< bool > retrieved_status;
+			for (uint32_t i = 0; i < num_digit_segments; i++){
+				uint32_t segment_to_check = top + delta[i]; // uses the top segment, and the known deltas based on grid size
+				// 1 if the segment is locked, 0 otherwise
+				retrieved_status.emplace_back(segment_status.find(segment_to_check)->second == SegmentOptions::LOCKED);
+			}
+			if (number_templates.find(retrieved_status) != number_templates.end()){ // if exact bool match to any template
+				for (uint32_t i = 0; i < num_digit_segments; i++){
+					// set it to scored to prevent double counting
+					segment_status.find(top + delta[i])->second = SegmentOptions::SCORED;
+				}				
+				return number_templates.find(retrieved_status)->second;
+			} else {
+				return (uint32_t)0;
+			}
+		};
 
-	// 	for (uint32_t r = 0; r < mesh_size - 3; r += 2){
-	// 		for (uint32_t c = 1; c < mesh_size; c += 2){
-	// 			score += get_score(inv_grid.find(glm::uvec2(r, c))->second);
-	// 		}	
-	// 	}
-	// }
+		for (uint32_t r = 0; r < mesh_size - 3; r += 2){
+			for (uint32_t c = 1; c < mesh_size; c += 2){
+				score += get_score(inv_grid.find(glm::uvec2(r, c))->second);
+			}	
+		}
+		std::cout<<"Score: "<<score<<std::endl;
+	}
 
 	// segment_status.find(active_segment)->second = SegmentOptions::HOVER;
 
 	if (lock) {
-		segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
+		if (segment_status.find(active_segment)->second != SegmentOptions::SCORED){
+			segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
+		}
 	}
 
 	// ball += ball_velocity * time;

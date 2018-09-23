@@ -140,52 +140,57 @@ int main(int argc, char **argv) {
 	while (Mode::current) {
 		//every pass through the game loop creates one frame of output
 		//  by performing three steps:
-
-		{ //(1) process any events that are pending
-			static SDL_Event evt;
-			while (SDL_PollEvent(&evt) == 1) {
-				//handle resizing:
-				if (evt.type == SDL_WINDOWEVENT && evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-					on_resize();
+		static auto then = std::chrono::steady_clock::now();
+		auto now = std::chrono::steady_clock::now();
+		if (now > then + std::chrono::nanoseconds(10000000)) {
+			{ //(1) process any events that are pending
+				static SDL_Event evt;
+				while (SDL_PollEvent(&evt) == 1) {
+					//handle resizing:
+					if (evt.type == SDL_WINDOWEVENT && evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+						on_resize();
+					}
+					//handle input:
+					if (Mode::current && Mode::current->handle_event(evt, window_size)) {
+						// mode handled it; great
+					} else if (evt.type == SDL_QUIT) {
+						Mode::set_current(nullptr);
+						break;
+					}
 				}
-				//handle input:
-				if (Mode::current && Mode::current->handle_event(evt, window_size)) {
-					// mode handled it; great
-				} else if (evt.type == SDL_QUIT) {
-					Mode::set_current(nullptr);
-					break;
-				}
+				if (!Mode::current) break;
 			}
-			if (!Mode::current) break;
+
+			{ //(2) call the current mode's "update" function to deal with elapsed time:
+				auto current_time = std::chrono::high_resolution_clock::now();
+				static auto previous_time = current_time;
+				float elapsed = std::chrono::duration< float >(current_time - previous_time).count();
+				previous_time = current_time;
+
+				//if frames are taking a very long time to process,
+				//lag to avoid spiral of death:
+				elapsed = std::min(0.1f, elapsed);
+
+				Mode::current->update(elapsed);
+				if (!Mode::current) break;
+			}
+
+			{ //(3) call the current mode's "draw" function to produce output:
+				//clear the depth+color buffers and set some default state:
+				glClearColor(0.5, 0.5, 0.5, 0.0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_DEPTH_TEST);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				Mode::current->draw(drawable_size);
+			}
+
+			//Finally, wait until the recently-drawn frame is shown before doing it all again:
+			SDL_GL_SwapWindow(window);
+
+			then = now;
 		}
-
-		{ //(2) call the current mode's "update" function to deal with elapsed time:
-			auto current_time = std::chrono::high_resolution_clock::now();
-			static auto previous_time = current_time;
-			float elapsed = std::chrono::duration< float >(current_time - previous_time).count();
-			previous_time = current_time;
-
-			//if frames are taking a very long time to process,
-			//lag to avoid spiral of death:
-			elapsed = std::min(0.1f, elapsed);
-
-			Mode::current->update(elapsed);
-			if (!Mode::current) break;
-		}
-
-		{ //(3) call the current mode's "draw" function to produce output:
-			//clear the depth+color buffers and set some default state:
-			glClearColor(0.5, 0.5, 0.5, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			Mode::current->draw(drawable_size);
-		}
-
-		//Finally, wait until the recently-drawn frame is shown before doing it all again:
-		SDL_GL_SwapWindow(window);
 	}
 
 
