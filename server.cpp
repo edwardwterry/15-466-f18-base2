@@ -33,7 +33,9 @@ int main(int argc, char **argv) {
 				}
 			}
 		}, 0.01);
-		std::cout<<state.controls.up<<state.controls.down<<state.controls.left<<state.controls.right<<state.controls.lock<<std::endl;
+		// }, 0.25);
+		// std::cout<<state.controls.up<<state.controls.down<<state.controls.left<<state.controls.right<<state.controls.lock<<std::endl;
+		state.update();
 		//every second or so, dump the current paddle position:
 		static auto then = std::chrono::steady_clock::now();
 		auto now = std::chrono::steady_clock::now();

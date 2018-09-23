@@ -119,7 +119,8 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 }
 
 void GameMode::update(float elapsed) {
-	state.update(elapsed);
+	// state.update(elapsed);
+	// state.update();
 	// state.update(controls);
 
 	if (client.connection) {

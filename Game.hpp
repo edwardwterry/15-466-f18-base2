@@ -18,7 +18,8 @@ struct Game {
 
 	Game();
 
-	void update(float time);
+	// void update(float time);
+	void update();
 	// void update(const Game::Controls &c);
 
 	void update_active_segment();
@@ -35,7 +36,7 @@ struct Game {
 	std::unordered_map< glm::uvec2, uint32_t > inv_grid;
 	uint32_t edge_index = 0;
 	std::unordered_map< uint32_t, uint32_t > segment_status;
-	uint32_t active_segment = 0;
+	uint32_t active_segment = 1;
 	uint32_t num_digit_segments = 7;
 	
 	enum SegmentOptions{
