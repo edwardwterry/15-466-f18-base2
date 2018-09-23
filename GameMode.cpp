@@ -21,22 +21,23 @@
 
 
 Load< MeshBuffer > meshes(LoadTagDefault, [](){
-	return new MeshBuffer(data_path("paddle-ball.pnc"));
+	return new MeshBuffer(data_path("grid.pnc"));
 });
 
 Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(meshes->make_vao_for_program(vertex_color_program->program));
 });
 
-Scene::Transform *paddle_transform = nullptr;
-Scene::Transform *ball_transform = nullptr;
+// Scene::Transform *paddle_transform = nullptr;
+// Scene::Transform *ball_transform = nullptr;
+Scene::Transform *grid_transform = nullptr;
 
 Scene::Camera *camera = nullptr;
 
 Load< Scene > scene(LoadTagDefault, [](){
 	Scene *ret = new Scene;
 	//load transform hierarchy:
-	ret->load(data_path("paddle-ball.scene"), [](Scene &s, Scene::Transform *t, std::string const &m){
+	ret->load(data_path("grid.scene"), [](Scene &s, Scene::Transform *t, std::string const &m){
 		Scene::Object *obj = s.new_object(t);
 
 		obj->program = vertex_color_program->program;
@@ -51,18 +52,19 @@ Load< Scene > scene(LoadTagDefault, [](){
 	});
 
 	//look up paddle and ball transforms:
-	for (Scene::Transform *t = ret->first_transform; t != nullptr; t = t->alloc_next) {
-		if (t->name == "Paddle") {
-			if (paddle_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
-			paddle_transform = t;
-		}
-		if (t->name == "Ball") {
-			if (ball_transform) throw std::runtime_error("Multiple 'Ball' transforms in scene.");
-			ball_transform = t;
-		}
-	}
-	if (!paddle_transform) throw std::runtime_error("No 'Paddle' transform in scene.");
-	if (!ball_transform) throw std::runtime_error("No 'Ball' transform in scene.");
+	// for (Scene::Transform *t = ret->first_transform; t != nullptr; t = t->alloc_next) {
+	// 	if (t->name == "Paddle") {
+	// 		if (paddle_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+	// 		paddle_transform = t;
+	// 	}
+	// 	if (t->name == "Ball") {
+	// 		if (ball_transform) throw std::runtime_error("Multiple 'Ball' transforms in scene.");
+	// 		ball_transform = t;
+	// 	}
+	// }
+	// if (!paddle_transform) throw std::runtime_error("No 'Paddle' transform in scene.");
+	// if (!ball_transform) throw std::runtime_error("No 'Ball' transform in scene.");
+	// if (!grid_transform) throw std::runtime_error("No 'Ball' transform in scene.");
 
 	//look up the camera:
 	for (Scene::Camera *c = ret->first_camera; c != nullptr; c = c->alloc_next) {
@@ -105,15 +107,7 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			controls.lock = (evt.type == SDL_KEYDOWN);
 			return true;
 		}
-		
 	}
-
-	// if (evt.type == SDL_MOUSEMOTION) {
-	// 	state.paddle.x = (evt.motion.x - 0.5f * window_size.x) / (0.5f * window_size.x) * Game::FrameWidth;
-	// 	state.paddle.x = std::max(state.paddle.x, -0.5f * Game::FrameWidth + 0.5f * Game::PaddleWidth);
-	// 	state.paddle.x = std::min(state.paddle.x,  0.5f * Game::FrameWidth - 0.5f * Game::PaddleWidth);
-	// }
-
 	return false;
 }
 
@@ -140,11 +134,11 @@ void GameMode::update(float elapsed) {
 	});
 
 	//copy game state to scene positions:
-	ball_transform->position.x = state.ball.x;
-	ball_transform->position.y = state.ball.y;
+	// ball_transform->position.x = state.ball.x;
+	// ball_transform->position.y = state.ball.y;
 
-	paddle_transform->position.x = state.paddle.x;
-	paddle_transform->position.y = state.paddle.y;
+	// paddle_transform->position.x = state.paddle.x;
+	// paddle_transform->position.y = state.paddle.y;
 }
 
 void GameMode::draw(glm::uvec2 const &drawable_size) {

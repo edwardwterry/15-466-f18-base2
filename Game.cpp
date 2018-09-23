@@ -127,7 +127,7 @@ void Game::update() {
 				score += get_score(inv_grid.find(glm::uvec2(r, c))->second);
 			}	
 		}
-		std::cout<<"Score: "<<score<<std::endl;
+		// std::cout<<"Score: "<<score<<std::endl;
 	}
 
 	// segment_status.find(active_segment)->second = SegmentOptions::HOVER;
@@ -137,6 +137,16 @@ void Game::update() {
 			segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
 		}
 	}
+
+	for (uint32_t i = 0; i < edge_index; i++){ // set all remaining ones to inactive
+		if (segment_status.find(i)->second != SegmentOptions::SCORED ||
+			segment_status.find(i)->second != SegmentOptions::LOCKED){
+			segment_status.find(i)->second = SegmentOptions::INACTIVE;
+		}
+	}
+
+	// leave with only 1 as active
+	segment_status.find(active_segment)->second = SegmentOptions::HOVER;
 
 	// ball += ball_velocity * time;
 	// if (ball.x >= 0.5f * FrameWidth - BallRadius) {
