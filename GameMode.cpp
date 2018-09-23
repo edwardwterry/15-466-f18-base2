@@ -28,9 +28,23 @@ Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(meshes->make_vao_for_program(vertex_color_program->program));
 });
 
+// Load< MeshBuffer > hover_seg(LoadTagDefault, [](){
+// 	return new MeshBuffer(data_path("hover_seg.pnc"));
+// });
+
+// Load< MeshBuffer > p1_seg(LoadTagDefault, [](){
+// 	return new MeshBuffer(data_path("p1_seg.pnc"));
+// });
+
+// Load< MeshBuffer > p2_seg(LoadTagDefault, [](){
+// 	return new MeshBuffer(data_path("p2_seg.pnc"));
+// });
+
 // Scene::Transform *paddle_transform = nullptr;
 // Scene::Transform *ball_transform = nullptr;
-Scene::Transform *grid_transform = nullptr;
+Scene::Transform *hover_seg_transform = nullptr;
+Scene::Transform *p1_seg_transform = nullptr;
+Scene::Transform *p2_seg_transform = nullptr;
 
 Scene::Camera *camera = nullptr;
 
@@ -52,16 +66,20 @@ Load< Scene > scene(LoadTagDefault, [](){
 	});
 
 	//look up paddle and ball transforms:
-	// for (Scene::Transform *t = ret->first_transform; t != nullptr; t = t->alloc_next) {
-	// 	if (t->name == "Paddle") {
-	// 		if (paddle_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
-	// 		paddle_transform = t;
-	// 	}
-	// 	if (t->name == "Ball") {
-	// 		if (ball_transform) throw std::runtime_error("Multiple 'Ball' transforms in scene.");
-	// 		ball_transform = t;
-	// 	}
-	// }
+	for (Scene::Transform *t = ret->first_transform; t != nullptr; t = t->alloc_next) {
+		if (t->name == "Hover_Seg") {
+			if (hover_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+			hover_seg_transform = t;
+		}
+		if (t->name == "P1_Seg") {
+			if (p1_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+			p1_seg_transform = t;
+		}
+		if (t->name == "P2_Seg") {
+			if (p2_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+			p2_seg_transform = t;
+		}
+	}
 	// if (!paddle_transform) throw std::runtime_error("No 'Paddle' transform in scene.");
 	// if (!ball_transform) throw std::runtime_error("No 'Ball' transform in scene.");
 	// if (!grid_transform) throw std::runtime_error("No 'Ball' transform in scene.");
