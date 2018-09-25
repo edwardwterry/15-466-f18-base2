@@ -1,27 +1,29 @@
 # Game Information
 (Note: fill in this portion with information about your game.)
 
-Title: (TODO: your game's title)
+Title: Seven Segments
 
-Author: (TODO: your name)
+Author: Edward Terry
 
-Design Document: [TODO: name of design document](TODO: link to design document)
+Design Document: Seven Segments (http://graphics.cs.cmu.edu/courses/15-466-f18/game2-designs/ijwo/)
 
 Screen Shot:
 
 ![Screen Shot](screenshot.png)
 
+** THIS IS MY DISCARD GAME! I spent way too long on setting up the game logic and infrastucture and miscalculated the difficulty of integrating all the components. A good lesson for the final game! **
+
 How To Play:
 
-TODO: describe the controls and (if needed) goals/strategy.
+Move the green cursor using WASD. Unimplemented: spacebar claims a segment.
 
 Changes From The Design Document:
 
-TODO: what did you need to add/remove/modify from the original design? Why?
+Unfortunately I didn't implement really any of the gameplay aspects in a visible way.
 
 Good / Bad / Ugly Code:
 
-TODO: provide examples of code you wrote from this project that you think is good (elegant, simple, useful), bad (hack-y, brittle, unreadable), and ugly (particularly inelegant). Provide a sentence or two of justification for the examples.
+I am quite proud of having made what I think is quite an intuitive grid framework for this environment. I wrote functions to calculate what score to apply based on sliding a template for each number over the grid at every timestep. Once a number is recognized, its corresponding segments are shifted from Locked to Scored to prevent them from being double counted. I managed to pass a relatively simple struct of Controls, just consisting of 5 bools, from the client to the server, but came unstuck when sending back the updated game state in the form of a vector to the client. I basically gave up all hope at that time and went to bed. I was unsure about how to elegantly control the speed of segment motion, which cannot be easily scaled by the elapsed time like continuous motion, because it is discrete. If I were to do this again, I would set up the network infrastructure first with simple and replaceable components, then populate the game logic. 
 
 # Using This Base Code
 
