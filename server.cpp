@@ -38,11 +38,11 @@ int main(int argc, char **argv) {
 					if (c->recv_buffer.size() < 1 + sizeof(Game::Controls)) {
 						return; //wait for more data
 					} else {
-						auto f =  data.find(c);
+						auto f =  data.find(c); // thanks Jim
 						assert(f != data.end());
 						memcpy(&f->second, c->recv_buffer.data() + 1, sizeof(Game::Controls));
-						std::cout<<f->second.up<<f->second.down<<f->second.left<<f->second.right<<f->second.lock;
-						std::cout<<"\n";
+						// std::cout<<f->second.up<<f->second.down<<f->second.left<<f->second.right<<f->second.lock;
+						// std::cout<<"\n";
 						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::Controls));
 					}
 				}
@@ -67,24 +67,12 @@ int main(int argc, char **argv) {
 		if (!server.connections.empty()) {
 			//send game state to client:		
 			for (auto &c : server.connections){
-				c.send_raw("s", 1);
-				// c.send_raw(&state.grid_size, sizeof(Game::grid_size));
-				c.send_raw(&state.segment_status, sizeof(Game::segment_status));
+				// c.send_raw("s", 1);
+				// // for (uint32_t i = 0; i < state.segment_status.size(); i++){	
+				// // 	c.send_raw(&state.segment_status[i], sizeof(uint32_t));		 <-- could never make this work
+				// // }
+				// c.send_raw(&state.segment_status, sizeof(Game::segment_status));
 			}
-			// for (int i = 0; i < server.connections.size(); i++){
-			// 	server.connections.
-			// 	server.connections[i].send_raw("s", 1);
-			// 	server.connections[i].send_raw(&state.segment_status, sizeof(state.segment_status));
-			// }
 		}		
-		// state.update();
-
-		//every second or so, dump the current paddle position:
-		static auto then = std::chrono::steady_clock::now();
-		auto now = std::chrono::steady_clock::now();
-		if (now > then + std::chrono::seconds(1)) {
-			then = now;
-			// std::cout << "Current paddle position: " << state.paddle.x << std::endl;
-		}
 	}
 }

@@ -29,8 +29,8 @@ Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 });
 
 Scene::Transform *hover_seg_transform = nullptr;
-Scene::Transform *p1_seg_transform = nullptr;
-Scene::Transform *p2_seg_transform = nullptr;
+// Scene::Transform *p1_seg_transform = nullptr;
+// Scene::Transform *p2_seg_transform = nullptr;
 
 Scene::Camera *camera = nullptr;
 
@@ -57,14 +57,14 @@ Load< Scene > scene(LoadTagDefault, [](){
 			if (hover_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
 			hover_seg_transform = t;
 		}
-		if (t->name == "P1_Seg") {
-			if (p1_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
-			p1_seg_transform = t;
-		}
-		if (t->name == "P2_Seg") {
-			if (p2_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
-			p2_seg_transform = t;
-		}
+		// if (t->name == "P1_Seg") {
+		// 	if (p1_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+		// 	p1_seg_transform = t;
+		// }
+		// if (t->name == "P2_Seg") {
+		// 	if (p2_seg_transform) throw std::runtime_error("Multiple 'Paddle' transforms in scene.");
+		// 	p2_seg_transform = t;
+		// }
 	}
 	if (!hover_seg_transform) throw std::runtime_error("No 'Hover_Seg' transform in scene.");
 	// if (!ball_transform) throw std::runtime_error("No 'Ball' transform in scene.");
@@ -134,6 +134,8 @@ void GameMode::update(float elapsed) {
 		client.connection.send_raw(&controls, sizeof(Controls));
 	}
 
+
+	// int count = 0;
 	client.poll([&](Connection *c, Connection::Event event){
 		if (event == Connection::OnOpen) {
 			//probably won't get this.
@@ -141,15 +143,15 @@ void GameMode::update(float elapsed) {
 			std::cerr << "Lost connection to server." << std::endl;
 		} else { assert(event == Connection::OnRecv);
 			if (c->recv_buffer[0] == 's') {
-				if (c->recv_buffer.size() < 1 + sizeof(Game::segment_status)) {
+				std::cout<<"c->recv_buffer.size(): "<<c->recv_buffer.size()<<std::endl;
+				if (c->recv_buffer.size() < (1 + sizeof(uint32_t) * state.segment_status.size())) {
 				// if (c->recv_buffer.size() < 1 + sizeof(Game::grid_size)) {
+					// std::cout<<"count: "<<count<<std::endl;
+					// count++;
 					return; //wait for more data
 				} else {
 					// memcpy(&state.segment_status, c->recv_buffer.data() + 1, sizeof(Game::segment_status));
 					// c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::segment_status));
-					// for (uint32_t i = 0; i < 1 + sizeof(Game::segment_status); i++){
-					// 	std::cout<<*c->recv_buffer.begin() 
-					// }
 					// memcpy(&state.grid_size, c->recv_buffer.data() + 1, sizeof(Game::grid_size));
 					// c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::grid_size));
 				}
@@ -157,7 +159,7 @@ void GameMode::update(float elapsed) {
 			// std::cerr << "Ignoring " << c->recv_buffer.size() << " bytes from server." << std::endl;
 			// c->recv_buffer.clear();
 		}
-	});
+	}, 0.01);
 
 	//copy game state to scene positions:
 	// std::cout<<state.grid_size<<std::endl;//->second;
@@ -172,19 +174,13 @@ void GameMode::update(float elapsed) {
 	// }
 	// std::cout<<"\n";
 
-
-	// if (state.segment_status.find(static_cast<uint32_t>(Game::SegmentOptions::HOVER)) != state.segment_status.end()){
-	// if (std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER) != state.segment_status.end()){
-	// uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
+	// move player cursor
 	hover_seg_transform->position = state.segment_id_to_coord(state.active_segment);
 	if (state.grid.find(state.active_segment)->second.x % 2 != 0){ // if on a vertical
 		hover_seg_transform->rotation = glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	} else {
 		hover_seg_transform->rotation = glm::angleAxis(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	}
-	// }
-	
-	// hover_seg_transform->position = glm::vec3(0.5f, 6.0f, 0.0f);
 }
 
 void GameMode::draw(glm::uvec2 const &drawable_size) {

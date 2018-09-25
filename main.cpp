@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 		//  by performing three steps:
 		static auto then = std::chrono::steady_clock::now();
 		auto now = std::chrono::steady_clock::now();
-		if (now > then + std::chrono::nanoseconds(10000000)) {
+		if (now > then + std::chrono::nanoseconds(100000000)) {
 			{ //(1) process any events that are pending
 				static SDL_Event evt;
 				while (SDL_PollEvent(&evt) == 1) {

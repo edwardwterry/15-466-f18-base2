@@ -40,25 +40,26 @@ Game::Game(){
 									3 * (int)grid_size + 1,
 									3 * (int)grid_size + 2,
 									4 * (int)grid_size + 2};
+
+		std::vector< uint32_t > test_5 {17, 24, 32, 40, 47};
+		for (uint32_t i = 0; i < test_5.size(); i++){
+			segment_status[i] = SegmentOptions::LOCKED;
+		}
 	}
 }
 
 glm::vec3 Game::segment_id_to_coord(const uint32_t &id){
-	glm::vec3 coord;// {0.0f, 0.0f, 0.0f};
+	glm::vec3 coord;
 	coord.x = static_cast<float>(grid.find(id)->second.y) * 0.5f * grid_edge_length;
 	coord.y = static_cast<float>(mesh_size - grid.find(id)->second.x) * 0.5f * grid_edge_length;
 	coord.z = 0.01f;
 	return coord;
 }
 
-
-// void Game::update(float time) {
 void Game::update() {
-// void Game::update(const Controls &controls) {
 	int32_t dr = 0;
 	int32_t dc = 0;
 	bool lock = false;
-	// std::cout<<"up in game.cpp: "<<controls.up<<std::endl;
 	if (controls.down) {
 		dr++;
 	} else if (controls.up) {
@@ -72,7 +73,6 @@ void Game::update() {
 	}
 	if (dc != 0) assert(dr == 0);
 	if (dr != 0) assert(dc == 0);
-	// std::cout<<"dcb4: "<<dc<<" drb4: "<<dr<<std::endl;
 	int32_t dc_input = dc;
 	int32_t dr_input = dr;
 	{ // work out next segment
@@ -105,11 +105,10 @@ void Game::update() {
 			}
 		}
 
-		std::cout<<"dc: "<<dc<<" dr: "<<dr<<std::endl;
 		glm::uvec2 next_coord = glm::uvec2(current_coord.x + dr, current_coord.y + dc);
-		std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
+		// std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
 		active_segment = inv_grid.find(next_coord)->second;
-		std::cout<<"New active segment: "<<active_segment<<std::endl;
+		// std::cout<<"New active segment: "<<active_segment<<std::endl;
 
 		// TODO: make segments which have been visited but are neither locked nor scored, to be inactive
 	}
@@ -120,13 +119,11 @@ void Game::update() {
 			for (uint32_t i = 0; i < num_digit_segments; i++){
 				uint32_t segment_to_check = top + delta[i]; // uses the top segment, and the known deltas based on grid size
 				// 1 if the segment is locked, 0 otherwise
-				// retrieved_status.emplace_back(segment_status.find(segment_to_check)->second == SegmentOptions::LOCKED);
 				retrieved_status.emplace_back(segment_status[segment_to_check] == SegmentOptions::LOCKED);
 			}
 			if (number_templates.find(retrieved_status) != number_templates.end()){ // if exact bool match to any template
 				for (uint32_t i = 0; i < num_digit_segments; i++){
 					// set it to scored to prevent double counting
-					// segment_status.find(top + delta[i])->second = SegmentOptions::SCORED;
 					segment_status[top + delta[i]] = SegmentOptions::SCORED;
 				}				
 				return number_templates.find(retrieved_status)->second;
@@ -140,29 +137,14 @@ void Game::update() {
 				score += get_score(inv_grid.find(glm::uvec2(r, c))->second);
 			}	
 		}
-		// std::cout<<"Score: "<<score<<std::endl;
+		std::cout<<"Score: "<<score<<std::endl;
 	}
-
-	// segment_status.find(active_segment)->second = SegmentOptions::HOVER;
-
-	// if (lock) {
-	// 	if (segment_status.find(active_segment)->second != SegmentOptions::SCORED){
-	// 		segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
-	// 	}
-	// }
 
 	if (lock) {
 		if (segment_status[active_segment] != SegmentOptions::SCORED){
 			segment_status[active_segment] = SegmentOptions::LOCKED;
 		}
 	}
-
-	// for (uint32_t i = 0; i < edge_index; i++){ // set all remaining ones to inactive
-	// 	if (segment_status.find(i)->second != SegmentOptions::SCORED ||
-	// 		segment_status.find(i)->second != SegmentOptions::LOCKED){
-	// 		segment_status.find(i)->second = SegmentOptions::INACTIVE;
-	// 	}
-	// }
 
 	for (uint32_t i = 0; i < edge_index; i++){ // set all remaining ones to inactive
 		if (segment_status[i] != SegmentOptions::SCORED ||
@@ -173,41 +155,4 @@ void Game::update() {
 
 	// leave with only 1 as active
 	segment_status[active_segment] = SegmentOptions::HOVER;
-
-	// ball += ball_velocity * time;
-	// if (ball.x >= 0.5f * FrameWidth - BallRadius) {
-	// 	ball_velocity.x = -std::abs(ball_velocity.x);
-	// }
-	// if (ball.x <=-0.5f * FrameWidth + BallRadius) {
-	// 	ball_velocity.x = std::abs(ball_velocity.x);
-	// }
-	// if (ball.y >= 0.5f * FrameHeight - BallRadius) {
-	// 	ball_velocity.y = -std::abs(ball_velocity.y);
-	// }
-	// if (ball.y <=-0.5f * FrameHeight + BallRadius) {
-	// 	ball_velocity.y = std::abs(ball_velocity.y);
-	// }
-
-	// auto do_point = [this](glm::vec2 const &pt) {
-	// 	glm::vec2 to = ball - pt;
-	// 	float len2 = glm::dot(to, to);
-	// 	if (len2 > BallRadius * BallRadius) return;
-	// 	//if point is inside ball, make ball velocity outward-going:
-	// 	float d = glm::dot(ball_velocity, to);
-	// 	ball_velocity += ((std::abs(d) - d) / len2) * to;
-	// };
-
-	// do_point(glm::vec2(paddle.x - 0.5f * PaddleWidth, paddle.y));
-	// do_point(glm::vec2(paddle.x + 0.5f * PaddleWidth, paddle.y));
-
-	// auto do_edge = [&](glm::vec2 const &a, glm::vec2 const &b) {
-	// 	float along = glm::dot(ball-a, b-a);
-	// 	float max = glm::dot(b-a,b-a);
-	// 	if (along <= 0.0f || along >= max) return;
-	// 	do_point(glm::mix(a,b,along/max));
-	// };
-
-	// do_edge(glm::vec2(paddle.x + 0.5f * PaddleWidth, paddle.y), glm::vec2(paddle.x - 0.5f * PaddleWidth, paddle.y));
-	// uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
-	// hover_seg_transform->position = state.segment_id_to_coord(seg_id);
 }
