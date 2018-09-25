@@ -47,7 +47,7 @@ glm::vec3 Game::segment_id_to_coord(const uint32_t &id){
 	glm::vec3 coord;// {0.0f, 0.0f, 0.0f};
 	coord.x = static_cast<float>(grid.find(id)->second.y) * 0.5f * grid_edge_length;
 	coord.y = static_cast<float>(mesh_size - grid.find(id)->second.x) * 0.5f * grid_edge_length;
-	coord.z = 0.0f;
+	coord.z = 0.01f;
 	return coord;
 }
 
@@ -105,11 +105,11 @@ void Game::update() {
 			}
 		}
 
-		// std::cout<<"dc: "<<dc<<" dr: "<<dr<<std::endl;
+		std::cout<<"dc: "<<dc<<" dr: "<<dr<<std::endl;
 		glm::uvec2 next_coord = glm::uvec2(current_coord.x + dr, current_coord.y + dc);
-		// std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
+		std::cout<<"Start: "<<glm::to_string(current_coord)<<" | End:"<<glm::to_string(next_coord)<<std::endl;
 		active_segment = inv_grid.find(next_coord)->second;
-		// std::cout<<"New active segment: "<<active_segment<<std::endl;
+		std::cout<<"New active segment: "<<active_segment<<std::endl;
 
 		// TODO: make segments which have been visited but are neither locked nor scored, to be inactive
 	}
@@ -173,7 +173,6 @@ void Game::update() {
 
 	// leave with only 1 as active
 	segment_status[active_segment] = SegmentOptions::HOVER;
-	// std::cout<<segment_status.find(active_segment)->second;
 
 	// ball += ball_velocity * time;
 	// if (ball.x >= 0.5f * FrameWidth - BallRadius) {
@@ -209,5 +208,6 @@ void Game::update() {
 	// };
 
 	// do_edge(glm::vec2(paddle.x + 0.5f * PaddleWidth, paddle.y), glm::vec2(paddle.x - 0.5f * PaddleWidth, paddle.y));
-
+	// uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
+	// hover_seg_transform->position = state.segment_id_to_coord(seg_id);
 }

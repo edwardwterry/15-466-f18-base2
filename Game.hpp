@@ -30,7 +30,7 @@ struct Game {
 	static constexpr const float PaddleHeight = 0.4f;
 	static constexpr const float BallRadius = 0.5f;
 
-	uint32_t grid_size = 3;
+	uint32_t grid_size = 7;
 	uint32_t mesh_size = grid_size * 2; 
 	std::unordered_map< uint32_t, glm::uvec2 > grid;
 	std::unordered_map< glm::uvec2, uint32_t > inv_grid;

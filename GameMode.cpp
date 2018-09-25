@@ -112,20 +112,27 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		}
 	}
-	if (client.connection) {
-		//send game state to server:
-		client.connection.send_raw("c", 1);
-		client.connection.send_raw(&controls, sizeof(Controls));
-	}	
-	return false;
-}
-
-void GameMode::update(float elapsed) {
 	// if (client.connection) {
 	// 	//send game state to server:
 	// 	client.connection.send_raw("c", 1);
 	// 	client.connection.send_raw(&controls, sizeof(Controls));
-	// }
+	// }	
+	return false;
+}
+
+void GameMode::update(float elapsed) {
+	state.controls.up = controls.up;
+	state.controls.down = controls.down;
+	state.controls.left = controls.left;
+	state.controls.right = controls.right;
+	state.controls.lock = controls.lock;
+	state.update();
+
+	if (client.connection) {
+		//send game state to server:
+		client.connection.send_raw("c", 1);
+		client.connection.send_raw(&controls, sizeof(Controls));
+	}
 
 	client.poll([&](Connection *c, Connection::Event event){
 		if (event == Connection::OnOpen) {
@@ -138,8 +145,11 @@ void GameMode::update(float elapsed) {
 				// if (c->recv_buffer.size() < 1 + sizeof(Game::grid_size)) {
 					return; //wait for more data
 				} else {
-					memcpy(&state.segment_status, c->recv_buffer.data() + 1, sizeof(Game::segment_status));
-					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::segment_status));
+					// memcpy(&state.segment_status, c->recv_buffer.data() + 1, sizeof(Game::segment_status));
+					// c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::segment_status));
+					// for (uint32_t i = 0; i < 1 + sizeof(Game::segment_status); i++){
+					// 	std::cout<<*c->recv_buffer.begin() 
+					// }
 					// memcpy(&state.grid_size, c->recv_buffer.data() + 1, sizeof(Game::grid_size));
 					// c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::grid_size));
 				}
@@ -165,8 +175,13 @@ void GameMode::update(float elapsed) {
 
 	// if (state.segment_status.find(static_cast<uint32_t>(Game::SegmentOptions::HOVER)) != state.segment_status.end()){
 	// if (std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER) != state.segment_status.end()){
-	// 	uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
-	// 	hover_seg_transform->position = state.segment_id_to_coord(seg_id);
+	// uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
+	hover_seg_transform->position = state.segment_id_to_coord(state.active_segment);
+	if (state.grid.find(state.active_segment)->second.x % 2 != 0){ // if on a vertical
+		hover_seg_transform->rotation = glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	} else {
+		hover_seg_transform->rotation = glm::angleAxis(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	}
 	// }
 	
 	// hover_seg_transform->position = glm::vec3(0.5f, 6.0f, 0.0f);

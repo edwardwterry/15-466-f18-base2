@@ -41,15 +41,17 @@ int main(int argc, char **argv) {
 						auto f =  data.find(c);
 						assert(f != data.end());
 						memcpy(&f->second, c->recv_buffer.data() + 1, sizeof(Game::Controls));
-						// std::cout<<f->second.up<<f->second.down<<f->second.left<<f->second.right<<f->second.lock;
-						// std::cout<<"\n";
+						std::cout<<f->second.up<<f->second.down<<f->second.left<<f->second.right<<f->second.lock;
+						std::cout<<"\n";
 						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::Controls));
 					}
 				}
 			}
 		}, 0.01);
 
-		state.update();
+		// state.update();
+		// std::cout<<"Active: "<<state.active_segment<<std::endl;
+
 		// std::cout<<"sizeof(state.segment_status)"<<sizeof(state.segment_status)<<std::endl;
 		// std::cout<<"sizeof(Game::segment_status)"<<sizeof(Game::segment_status)<<std::endl;
 
