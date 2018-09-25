@@ -35,9 +35,11 @@ struct Game {
 	std::unordered_map< uint32_t, glm::uvec2 > grid;
 	std::unordered_map< glm::uvec2, uint32_t > inv_grid;
 	uint32_t edge_index = 0;
-	std::unordered_map< uint32_t, uint32_t > segment_status;
+	std::unordered_map< uint32_t, uint32_t > segment_status; // segment id, status
+	std::unordered_map< uint32_t, uint32_t > received_segment_status;
 	uint32_t active_segment = 4;
-	uint32_t num_digit_segments = 7;
+	const uint32_t num_digit_segments = 7;
+	float grid_edge_length = 1.0f;
 	
 	enum SegmentOptions{
 		INACTIVE,
@@ -58,4 +60,6 @@ struct Game {
 	std::vector< int32_t > delta;
 	
 	uint32_t score = 0;
+
+	glm::vec3 segment_id_to_coord(const uint32_t &id);
 };

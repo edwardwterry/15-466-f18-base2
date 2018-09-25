@@ -5,6 +5,8 @@
 #include <set>
 #include <chrono>
 
+#include <map>
+
 int main(int argc, char **argv) {
 	if (argc != 2) {
 		std::cerr << "Usage:\n\t./server <port>" << std::endl;
@@ -15,11 +17,18 @@ int main(int argc, char **argv) {
 
 	Game state;
 
+	std::unordered_map< Connection *,  Game::Controls> data;
+
 	while (1) {
-		server.poll([&](Connection *c, Connection::Event evt){
-			if (evt == Connection::OnOpen) {
-			} else if (evt == Connection::OnClose) {
-			} else { assert(evt == Connection::OnRecv);
+		server.poll([&](Connection *c, Connection::Event e) {
+			if (e == Connection::OnOpen) {
+				assert(!data.count(c));
+				data.insert(std::make_pair(c, state.controls));
+			} else if (e == Connection::OnClose) {
+				auto f =  data.find(c);
+				assert(f != data.end());
+				data.erase(f);
+			} else if (e == Connection::OnRecv) {
 				if (c->recv_buffer[0] == 'h') {
 					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1);
 					std::cout << c << ": Got hello." << std::endl;
@@ -27,15 +36,30 @@ int main(int argc, char **argv) {
 					if (c->recv_buffer.size() < 1 + sizeof(Game::Controls)) {
 						return; //wait for more data
 					} else {
-						memcpy(&state.controls, c->recv_buffer.data() + 1, sizeof(Game::Controls));
+						auto f =  data.find(c);
+						assert(f != data.end());
+						memcpy(&f->second, c->recv_buffer.data() + 1, sizeof(Game::Controls));
 						c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::Controls));
 					}
 				}
 			}
-		// }, 0.01);
 		}, 0.01);
-		// std::cout<<state.controls.up<<state.controls.down<<state.controls.left<<state.controls.right<<state.controls.lock<<std::endl;
+
 		state.update();
+
+		if (!server.connections.empty()) {
+			//send game state to client:
+			for (auto &c : server.connections){
+				c.send_raw("s", 1);
+				c.send_raw(&state.segment_status, sizeof(state.segment_status));
+			}
+			// for (int i = 0; i < server.connections.size(); i++){
+			// 	server.connections.
+			// 	server.connections[i].send_raw("s", 1);
+			// 	server.connections[i].send_raw(&state.segment_status, sizeof(state.segment_status));
+			// }
+		}		
+
 		//every second or so, dump the current paddle position:
 		static auto then = std::chrono::steady_clock::now();
 		auto now = std::chrono::steady_clock::now();

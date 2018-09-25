@@ -41,6 +41,15 @@ Game::Game(){
 	}
 }
 
+glm::vec3 Game::segment_id_to_coord(const uint32_t &id){
+	glm::vec3 coord;
+	coord.x = std::find(grid.begin(), grid.end(), id)->second.y * 0.5 * grid_edge_length;
+	coord.y = (mesh_size - std::find(grid.begin(), grid.end(), id)->second.x) * 0.5 * grid_edge_length;
+	coord.z = 0;
+	return coord;
+}
+
+
 // void Game::update(float time) {
 void Game::update() {
 // void Game::update(const Controls &controls) {

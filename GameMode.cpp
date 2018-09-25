@@ -28,20 +28,6 @@ Load< GLuint > meshes_for_vertex_color_program(LoadTagDefault, [](){
 	return new GLuint(meshes->make_vao_for_program(vertex_color_program->program));
 });
 
-// Load< MeshBuffer > hover_seg(LoadTagDefault, [](){
-// 	return new MeshBuffer(data_path("hover_seg.pnc"));
-// });
-
-// Load< MeshBuffer > p1_seg(LoadTagDefault, [](){
-// 	return new MeshBuffer(data_path("p1_seg.pnc"));
-// });
-
-// Load< MeshBuffer > p2_seg(LoadTagDefault, [](){
-// 	return new MeshBuffer(data_path("p2_seg.pnc"));
-// });
-
-// Scene::Transform *paddle_transform = nullptr;
-// Scene::Transform *ball_transform = nullptr;
 Scene::Transform *hover_seg_transform = nullptr;
 Scene::Transform *p1_seg_transform = nullptr;
 Scene::Transform *p2_seg_transform = nullptr;
@@ -80,7 +66,7 @@ Load< Scene > scene(LoadTagDefault, [](){
 			p2_seg_transform = t;
 		}
 	}
-	// if (!paddle_transform) throw std::runtime_error("No 'Paddle' transform in scene.");
+	if (!hover_seg_transform) throw std::runtime_error("No 'Hover_Seg' transform in scene.");
 	// if (!ball_transform) throw std::runtime_error("No 'Ball' transform in scene.");
 	// if (!grid_transform) throw std::runtime_error("No 'Ball' transform in scene.");
 
@@ -146,12 +132,22 @@ void GameMode::update(float elapsed) {
 		} else if (event == Connection::OnClose) {
 			std::cerr << "Lost connection to server." << std::endl;
 		} else { assert(event == Connection::OnRecv);
-			std::cerr << "Ignoring " << c->recv_buffer.size() << " bytes from server." << std::endl;
-			c->recv_buffer.clear();
+			if (c->recv_buffer[0] == 's') {
+				if (c->recv_buffer.size() < 1 + sizeof(Game::received_segment_status)) {
+					return; //wait for more data
+				} else {
+					memcpy(&state.received_segment_status, c->recv_buffer.data() + 1, sizeof(Game::received_segment_status));
+					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::received_segment_status));
+				}
+			}		
+			// std::cerr << "Ignoring " << c->recv_buffer.size() << " bytes from server." << std::endl;
+			// c->recv_buffer.clear();
 		}
 	});
 
 	//copy game state to scene positions:
+	uint32_t seg_id = std::find(state.received_segment_status.begin(), state.received_segment_status.end(), Game::SegmentOptions::HOVER)->first;
+	hover_seg_transform->position = state.segment_id_to_coord(seg_id);
 	// ball_transform->position.x = state.ball.x;
 	// ball_transform->position.y = state.ball.y;
 
