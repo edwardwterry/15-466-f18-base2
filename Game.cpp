@@ -14,9 +14,11 @@ Game::Game(){
 		}
 
 		for (uint32_t i = 0; i < edge_index; i++){ // set all segments as inactive to start
-			segment_status.insert(std::pair<uint32_t, uint32_t> (i, SegmentOptions::INACTIVE));
+			// segment_status.insert(std::pair<uint32_t, uint32_t> (i, SegmentOptions::INACTIVE));
+			segment_status.push_back(SegmentOptions::INACTIVE);
 		}
-		segment_status.find(active_segment)->second = SegmentOptions::HOVER; // set the upper left element to active
+		// segment_status.find(active_segment)->second = SegmentOptions::HOVER; // set the upper left element to active
+		segment_status[active_segment] = SegmentOptions::HOVER; // set the upper left element to active
 	}
 
 	{ // initialize number templates
@@ -42,10 +44,10 @@ Game::Game(){
 }
 
 glm::vec3 Game::segment_id_to_coord(const uint32_t &id){
-	glm::vec3 coord;
-	coord.x = std::find(grid.begin(), grid.end(), id)->second.y * 0.5 * grid_edge_length;
-	coord.y = (mesh_size - std::find(grid.begin(), grid.end(), id)->second.x) * 0.5 * grid_edge_length;
-	coord.z = 0;
+	glm::vec3 coord;// {0.0f, 0.0f, 0.0f};
+	coord.x = static_cast<float>(grid.find(id)->second.y) * 0.5f * grid_edge_length;
+	coord.y = static_cast<float>(mesh_size - grid.find(id)->second.x) * 0.5f * grid_edge_length;
+	coord.z = 0.0f;
 	return coord;
 }
 
@@ -73,7 +75,7 @@ void Game::update() {
 	// std::cout<<"dcb4: "<<dc<<" drb4: "<<dr<<std::endl;
 	int32_t dc_input = dc;
 	int32_t dr_input = dr;
-	{
+	{ // work out next segment
 		glm::uvec2 current_coord = grid.find(active_segment)->second; 
 		// std::cout<<"(current_coord.x + dr): "<<(current_coord.x + dr)<<std::endl;
 		// can only move L/R on vert segments
@@ -118,12 +120,14 @@ void Game::update() {
 			for (uint32_t i = 0; i < num_digit_segments; i++){
 				uint32_t segment_to_check = top + delta[i]; // uses the top segment, and the known deltas based on grid size
 				// 1 if the segment is locked, 0 otherwise
-				retrieved_status.emplace_back(segment_status.find(segment_to_check)->second == SegmentOptions::LOCKED);
+				// retrieved_status.emplace_back(segment_status.find(segment_to_check)->second == SegmentOptions::LOCKED);
+				retrieved_status.emplace_back(segment_status[segment_to_check] == SegmentOptions::LOCKED);
 			}
 			if (number_templates.find(retrieved_status) != number_templates.end()){ // if exact bool match to any template
 				for (uint32_t i = 0; i < num_digit_segments; i++){
 					// set it to scored to prevent double counting
-					segment_status.find(top + delta[i])->second = SegmentOptions::SCORED;
+					// segment_status.find(top + delta[i])->second = SegmentOptions::SCORED;
+					segment_status[top + delta[i]] = SegmentOptions::SCORED;
 				}				
 				return number_templates.find(retrieved_status)->second;
 			} else {
@@ -141,21 +145,35 @@ void Game::update() {
 
 	// segment_status.find(active_segment)->second = SegmentOptions::HOVER;
 
+	// if (lock) {
+	// 	if (segment_status.find(active_segment)->second != SegmentOptions::SCORED){
+	// 		segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
+	// 	}
+	// }
+
 	if (lock) {
-		if (segment_status.find(active_segment)->second != SegmentOptions::SCORED){
-			segment_status.find(active_segment)->second = SegmentOptions::LOCKED;
+		if (segment_status[active_segment] != SegmentOptions::SCORED){
+			segment_status[active_segment] = SegmentOptions::LOCKED;
 		}
 	}
+
+	// for (uint32_t i = 0; i < edge_index; i++){ // set all remaining ones to inactive
+	// 	if (segment_status.find(i)->second != SegmentOptions::SCORED ||
+	// 		segment_status.find(i)->second != SegmentOptions::LOCKED){
+	// 		segment_status.find(i)->second = SegmentOptions::INACTIVE;
+	// 	}
+	// }
 
 	for (uint32_t i = 0; i < edge_index; i++){ // set all remaining ones to inactive
-		if (segment_status.find(i)->second != SegmentOptions::SCORED ||
-			segment_status.find(i)->second != SegmentOptions::LOCKED){
-			segment_status.find(i)->second = SegmentOptions::INACTIVE;
+		if (segment_status[i] != SegmentOptions::SCORED ||
+			segment_status[i] != SegmentOptions::LOCKED){
+			segment_status[i] = SegmentOptions::INACTIVE;
 		}
-	}
+	}	
 
 	// leave with only 1 as active
-	segment_status.find(active_segment)->second = SegmentOptions::HOVER;
+	segment_status[active_segment] = SegmentOptions::HOVER;
+	// std::cout<<segment_status.find(active_segment)->second;
 
 	// ball += ball_velocity * time;
 	// if (ball.x >= 0.5f * FrameWidth - BallRadius) {

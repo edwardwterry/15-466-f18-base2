@@ -112,19 +112,20 @@ bool GameMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		}
 	}
-	return false;
-}
-
-void GameMode::update(float elapsed) {
-	// state.update(elapsed);
-	// state.update();
-	// state.update(controls);
-
 	if (client.connection) {
 		//send game state to server:
 		client.connection.send_raw("c", 1);
 		client.connection.send_raw(&controls, sizeof(Controls));
-	}
+	}	
+	return false;
+}
+
+void GameMode::update(float elapsed) {
+	// if (client.connection) {
+	// 	//send game state to server:
+	// 	client.connection.send_raw("c", 1);
+	// 	client.connection.send_raw(&controls, sizeof(Controls));
+	// }
 
 	client.poll([&](Connection *c, Connection::Event event){
 		if (event == Connection::OnOpen) {
@@ -133,11 +134,14 @@ void GameMode::update(float elapsed) {
 			std::cerr << "Lost connection to server." << std::endl;
 		} else { assert(event == Connection::OnRecv);
 			if (c->recv_buffer[0] == 's') {
-				if (c->recv_buffer.size() < 1 + sizeof(Game::received_segment_status)) {
+				if (c->recv_buffer.size() < 1 + sizeof(Game::segment_status)) {
+				// if (c->recv_buffer.size() < 1 + sizeof(Game::grid_size)) {
 					return; //wait for more data
 				} else {
-					memcpy(&state.received_segment_status, c->recv_buffer.data() + 1, sizeof(Game::received_segment_status));
-					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::received_segment_status));
+					memcpy(&state.segment_status, c->recv_buffer.data() + 1, sizeof(Game::segment_status));
+					c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::segment_status));
+					// memcpy(&state.grid_size, c->recv_buffer.data() + 1, sizeof(Game::grid_size));
+					// c->recv_buffer.erase(c->recv_buffer.begin(), c->recv_buffer.begin() + 1 + sizeof(Game::grid_size));
 				}
 			}		
 			// std::cerr << "Ignoring " << c->recv_buffer.size() << " bytes from server." << std::endl;
@@ -146,13 +150,26 @@ void GameMode::update(float elapsed) {
 	});
 
 	//copy game state to scene positions:
-	uint32_t seg_id = std::find(state.received_segment_status.begin(), state.received_segment_status.end(), Game::SegmentOptions::HOVER)->first;
-	hover_seg_transform->position = state.segment_id_to_coord(seg_id);
-	// ball_transform->position.x = state.ball.x;
-	// ball_transform->position.y = state.ball.y;
+	// std::cout<<state.grid_size<<std::endl;//->second;
+	// auto it = state.grid_size.begin();
+	// auto it = state.segment_status.begin();
+	
+	// // // Iterate over the map using iterator
+	// while(it != state.segment_status.end())
+	// {
+	// 	std::cout<<*it<<std::endl;
+	// 	it++;
+	// }
+	// std::cout<<"\n";
 
-	// paddle_transform->position.x = state.paddle.x;
-	// paddle_transform->position.y = state.paddle.y;
+
+	// if (state.segment_status.find(static_cast<uint32_t>(Game::SegmentOptions::HOVER)) != state.segment_status.end()){
+	// if (std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER) != state.segment_status.end()){
+	// 	uint32_t seg_id = static_cast<uint32_t>(std::distance(std::find(state.segment_status.begin(), state.segment_status.end(), Game::SegmentOptions::HOVER), state.segment_status.begin()));
+	// 	hover_seg_transform->position = state.segment_id_to_coord(seg_id);
+	// }
+	
+	// hover_seg_transform->position = glm::vec3(0.5f, 6.0f, 0.0f);
 }
 
 void GameMode::draw(glm::uvec2 const &drawable_size) {
